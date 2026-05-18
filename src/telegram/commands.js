@@ -29,8 +29,8 @@ import { handleCallback, editMenuMessage } from './callbacks.js';
 import { consumeNumericFilterInput } from './input.js';
 import { runLearning, sendLessons } from '../learning/commands.js';
 import { fetchWalletPnl } from '../enrichment/wallets.js';
-import { fetchTwitterMentions } from '../modules/twitter-sentiment.js';
-import { trackWallet, getTrackedWallets, getWalletStats } from '../modules/wallet-tracker.js';
+import { searchRecentTweets, getTokenSentiment } from '../modules/twitter-sentiment.js';
+import { analyzeWalletPerformance, getTopTraders, checkWalletNewBuys } from '../modules/wallet-tracker.js';
 import { getProfitLockStatus } from '../modules/profit-lock.js';
 
 export async function handleMessage(msg) {
@@ -82,7 +82,7 @@ export async function handleMessage(msg) {
   if (text.startsWith('/sentiment')) {
     const symbol = (text.split(/\s+/)[1] || '').toUpperCase();
     if (!symbol) return bot.sendMessage(chatId, 'Usage: /sentiment <token_symbol>\nExample: /sentiment FARTCOIN');
-    const mentions = await fetchTwitterMentions(symbol).catch(() => null);
+    const mentions = await searchRecentTweets(symbol).catch(() => null);
     if (!mentions) return bot.sendMessage(chatId, 'Twitter API not configured or no data.');
     return bot.sendMessage(chatId, mentions, { parse_mode: 'HTML' });
   }
@@ -95,10 +95,9 @@ export async function handleMessage(msg) {
       for (const w of tracked) lines.push('- ' + (w.label || w.address.slice(0,8)));
       return bot.sendMessage(chatId, lines.join('\n'));
     }
-    const stats = await getWalletStats(address).catch(() => null);
+    const stats = await analyzeWalletPerformance(address).catch(() => null);
     if (!stats) return bot.sendMessage(chatId, 'Could not fetch wallet data');
     const msg = 'Wallet: ' + address.slice(0,12) + '...\nPnL: ' + (stats.pnl_sol || 0) + ' SOL\nTrades: ' + (stats.total_trades || 0);
-    trackWallet(address);
     return bot.sendMessage(chatId, msg);
   }
   if (text.startsWith('/profitlock')) {
