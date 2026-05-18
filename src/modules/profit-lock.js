@@ -33,18 +33,25 @@ const DEFAULT_INITIAL_SL = -0.20; // -20%
  * @returns {number} - The lock level (minimum exit percentage)
  */
 export function calculateProfitLock(pnlPercent, peakPnlPercent) {
-  let lockLevel = null;
+  return calculateProfitLockWithTiers(pnlPercent, peakPnlPercent, PROFIT_TIERS);
+}
+
+export function calculateProfitLockWithTiers(pnlPercent, peakPnlPercent, tiers) {
+  if (!tiers || !tiers.length) return null;
   
-  // Check static tiers first
-  for (const tier of PROFIT_TIERS) {
-    if (pnlPercent >= tier.threshold) {
-      lockLevel = tier.lock;
+  let lockLevel = null;
+  for (const tier of tiers) {
+    if (pnlPercent >= Number(tier.threshold)) {
+      lockLevel = Number(tier.lock);
     }
   }
   
-  // Above +80%, use dynamic lock: peak - 30%
-  if (pnlPercent > 0.80) {
-    return Math.max(peakPnlPercent - 0.30, lockLevel);
+  if (lockLevel === null) return null;
+  
+  // If above top threshold and still below ATH, use dynamic lock (70% of current PnL)
+  const topThreshold = Number(tiers[tiers.length - 1]?.threshold || 0);
+  if (pnlPercent >= topThreshold && peakPnlPercent > pnlPercent) {
+    return Math.max(lockLevel, pnlPercent * 0.70);
   }
   
   return lockLevel;
@@ -66,7 +73,7 @@ export function calculatePnL(entryMcap, currentMcap) {
  * @param {number} highWaterMcap - Highest market cap achieved
  * @returns {object} - { shouldExit, exitReason, lockLevel }
  */
-export function shouldExitWithProfitLock(position, currentMcap, highWaterMcap) {
+export function shouldExitWithProfitLock(position, currentMcap, highWaterMcap, tiersOverride = null) {
   const entryMcap = Number(position.entry_mcap);
   if (!entryMcap || entryMcap <= 0) return { shouldExit: false, exitReason: null, lockLevel: null };
   
@@ -81,8 +88,9 @@ export function shouldExitWithProfitLock(position, currentMcap, highWaterMcap) {
     return { shouldExit: true, exitReason: 'SL', lockLevel: pnlPercent };
   }
   
-  // Calculate profit lock
-  const lockLevel = calculateProfitLock(pnlPercent, highWatermarkPnL);
+  // Calculate profit lock — use strategy tiers if provided
+  const tiers = tiersOverride || position.profit_lock_tiers || PROFIT_TIERS;
+  const lockLevel = calculateProfitLockWithTiers(pnlPercent, highWatermarkPnL, tiers);
   
   if (lockLevel === null) {
     // Below first threshold — no lock yet, don't exit unless SL hit

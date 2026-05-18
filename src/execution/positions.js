@@ -11,6 +11,7 @@ import { openPositions } from '../db/positions.js';
 import { updateCandidateSnapshot } from '../db/candidates.js';
 import { trending } from '../signals/trending.js';
 import { executeLiveSell } from './router.js';
+import { shouldExitWithProfitLock } from '../modules/profit-lock.js';
 import { sendPositionExit } from '../telegram/send.js';
 
 export async function freshEntryMarket(mint, candidate) {
@@ -158,6 +159,15 @@ export async function refreshPosition(position, { autoExit = true, jupiterPnl = 
       } catch (err) {
         console.log(`[position] ${position.id} partial sell failed: ${err.message}`);
       }
+    }
+  }
+
+  // Profit lock check — progressive exit based on strategy tiers
+  if (!exitReason && strat?.use_profit_lock) {
+    const pl = shouldExitWithProfitLock(position, mcap, highWaterMcap, strat.profit_lock_tiers);
+    if (pl.shouldExit && pl.exitReason !== 'SL') {
+      exitReason = pl.exitReason; // PROFIT_LOCK
+      console.log(`[position] ${position.id} profit lock triggered: ${pl.lockLevel?.toFixed(1)}% PnL locked at threshold`);
     }
   }
 
