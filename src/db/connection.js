@@ -430,9 +430,6 @@ export function initDb() {
 }
 
 export function ensureColumn(table, column, ddl) {
-}
-
-export function ensureColumn(table, column, ddl) {
   const columns = db.prepare(`PRAGMA table_info(${table})`).all().map(row => row.name);
   if (!columns.includes(column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`);
 }
