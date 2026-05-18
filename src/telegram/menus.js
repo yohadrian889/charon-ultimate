@@ -1,6 +1,6 @@
 import { escapeHtml, fmtPct, fmtSol, fmtUsd, short } from '../format.js';
 import { numSetting, boolSetting, setting, activeStrategy, allStrategies } from '../db/settings.js';
-import { openPositionCount, tradingMode, allPositions } from '../db/positions.js';
+import { openPositionCount, tradingMode, allPositions, openPositionsByMode, closedPositions, allPositionsByMode } from '../db/positions.js';
 import { savedWallets } from '../enrichment/wallets.js';
 import { gmgnStatusText } from '../enrichment/gmgn.js';
 import { formatPosition } from './format.js';
@@ -180,14 +180,45 @@ export function walletsText() {
   const rows = savedWallets();
   const body = rows.length
     ? rows.map(row => `• <b>${escapeHtml(row.label)}</b>: <code>${escapeHtml(row.address)}</code>`).join('\n')
-    : 'No saved wallets. Use /walletadd &lt;label&gt; &lt;address&gt;';
+    : 'No saved wallets. Use /walletadd <label> <address>';
   return `👛 <b>Saved Wallets</b>\n\n${body}`;
 }
 
 export function positionsText() {
-  const rows = allPositions(12);
-  const text = rows.length ? rows.map(formatPosition).join('\n\n') : 'No dry-run positions yet.';
-  return `📍 <b>Positions</b>\n\n${text}`;
+  const dryOpen = openPositionsByMode('dry_run');
+  const liveOpen = openPositionsByMode('live');
+  const dryClosed = closedPositions('dry_run', 5);
+  const liveClosed = closedPositions('live', 5);
+
+  const lines = [];
+  lines.push('📍 <b>OPEN POSITIONS</b>');
+
+  if (dryOpen.length) {
+    lines.push('[DRY RUN]');
+    lines.push(...dryOpen.map(formatPosition));
+  }
+  if (liveOpen.length) {
+    lines.push('[LIVE]');
+    lines.push(...liveOpen.map(formatPosition));
+  }
+  if (!dryOpen.length && !liveOpen.length) {
+    lines.push('No open positions.');
+  }
+
+  const hasClosed = dryClosed.length || liveClosed.length;
+  if (hasClosed) {
+    lines.push('\n📕 <b>RECENTLY CLOSED</b>');
+    if (dryClosed.length) {
+      lines.push('[DRY RUN]');
+      lines.push(...dryClosed.map(formatPosition));
+    }
+    if (liveClosed.length) {
+      lines.push('[LIVE]');
+      lines.push(...liveClosed.map(formatPosition));
+    }
+  }
+
+  return lines.join('\n');
 }
 
 export function strategyMenuText() {

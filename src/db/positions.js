@@ -2,8 +2,26 @@ import { db } from './connection.js';
 import { now, json } from '../utils.js';
 import { numSetting, boolSetting, setting, activeStrategy } from './settings.js';
 
-export function openPositions() {
-  return db.prepare('SELECT * FROM dry_run_positions WHERE status = ? ORDER BY opened_at_ms DESC').all('open');
+export function allPositionsByMode(mode, limit = 12) {
+  return db.prepare('SELECT * FROM dry_run_positions WHERE execution_mode = ? ORDER BY id DESC LIMIT ?').all(mode, limit);
+}
+
+export function openPositions(mode = null) {
+  const sql = mode
+    ? 'SELECT * FROM dry_run_positions WHERE status = ? AND execution_mode = ? ORDER BY opened_at_ms DESC'
+    : 'SELECT * FROM dry_run_positions WHERE status = ? ORDER BY opened_at_ms DESC';
+  return mode ? db.prepare(sql).all('open', mode) : db.prepare(sql).all('open');
+}
+
+export function openPositionsByMode(mode) {
+  return db.prepare('SELECT * FROM dry_run_positions WHERE status = ? AND execution_mode = ? ORDER BY opened_at_ms DESC').all('open', mode);
+}
+
+export function closedPositions(mode = null, limit = 12) {
+  const sql = mode
+    ? 'SELECT * FROM dry_run_positions WHERE status = ? AND execution_mode = ? ORDER BY closed_at_ms DESC LIMIT ?'
+    : 'SELECT * FROM dry_run_positions WHERE status = ? ORDER BY closed_at_ms DESC LIMIT ?';
+  return mode ? db.prepare(sql).all('closed', mode, limit) : db.prepare(sql).all('closed', limit);
 }
 
 export function openPositionCount() {
