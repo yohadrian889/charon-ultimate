@@ -375,6 +375,61 @@ export function initDb() {
     use_llm: false,
     llm_min_confidence: 0,
   }), ts);
+
+  stratInsert.run('stable_money', '💰 Stable Money', 0, JSON.stringify({
+    entry_mode: 'immediate', min_source_count: 2, require_fee_claim: true,
+    token_age_max_ms: 10800000, min_mcap_usd: 10000, max_mcap_usd: 150000,
+    min_fee_claim_sol: 0.3, min_gmgn_total_fee_sol: 10, min_holders: 100,
+    max_top20_holder_percent: 100, min_saved_wallet_holders: 0, max_ath_distance_pct: 0,
+    min_graduated_volume_usd: 0, trending_min_volume_usd: 0, trending_min_swaps: 0,
+    trending_max_rug_ratio: 0.3, trending_max_bundler_rate: 0.5,
+    position_size_sol: 0.05, max_open_positions: 3,
+    tp_percent: 999, sl_percent: -25, trailing_enabled: true, trailing_percent: 25,
+    partial_tp: true, partial_tp_at_percent: 20, partial_tp_sell_percent: 50,
+    max_hold_ms: 1800000, use_llm: true, llm_min_confidence: 60,
+    use_profit_lock: true, profit_lock_tiers: [
+      { threshold: 0.10, lock: 0.03 }, { threshold: 0.25, lock: 0.10 },
+      { threshold: 0.50, lock: 0.25 }, { threshold: 0.80, lock: 0.40 },
+    ], profit_lock_dynamic_pct: 0.35,
+  }), ts);
+
+  stratInsert.run('holder', '💎 Diamond Hands', 0, JSON.stringify({
+    entry_mode: 'immediate', min_source_count: 2, require_fee_claim: true,
+    token_age_max_ms: 0, min_mcap_usd: 50000, max_mcap_usd: 1000000,
+    min_fee_claim_sol: 1.0, min_gmgn_total_fee_sol: 10, min_holders: 500,
+    max_top20_holder_percent: 60, min_saved_wallet_holders: 0, max_ath_distance_pct: 0,
+    min_graduated_volume_usd: 0, trending_min_volume_usd: 0, trending_min_swaps: 0,
+    trending_max_rug_ratio: 0.2, trending_max_bundler_rate: 0.3,
+    position_size_sol: 0.15, max_open_positions: 3,
+    tp_percent: 999, sl_percent: -50, trailing_enabled: true, trailing_percent: 40,
+    partial_tp: true, partial_tp_at_percent: 100, partial_tp_sell_percent: 25,
+    max_hold_ms: 0, use_llm: true, llm_min_confidence: 80,
+    use_profit_lock: true, profit_lock_tiers: [
+      { threshold: 0.30, lock: 0.15 }, { threshold: 1.00, lock: 0.50 },
+      { threshold: 3.00, lock: 1.50 },
+    ], profit_lock_dynamic_pct: 0.35,
+  }), ts);
+
+  stratInsert.run('ultimate_degen', '🎲 Ultimate Degen', 0, JSON.stringify({
+    entry_mode: 'immediate', min_source_count: 1, require_fee_claim: false,
+    token_age_max_ms: 5400000, min_mcap_usd: 10000, max_mcap_usd: 300000,
+    min_fee_claim_sol: 0.15, min_gmgn_total_fee_sol: 0, min_holders: 75,
+    max_top20_holder_percent: 100, min_saved_wallet_holders: 0, max_ath_distance_pct: 0,
+    min_graduated_volume_usd: 0, trending_min_volume_usd: 0, trending_min_swaps: 0,
+    trending_max_rug_ratio: 0.5, trending_max_bundler_rate: 0.7,
+    position_size_sol: 0.25, max_open_positions: 3,
+    tp_percent: 999, sl_percent: -15, trailing_enabled: false, trailing_percent: 0,
+    partial_tp: true, partial_tp_at_percent: 100, partial_tp_sell_percent: 50,
+    max_hold_ms: 0, use_llm: true, llm_min_confidence: 50,
+    use_profit_lock: true, profit_lock_tiers: [
+      { threshold: 0.10, lock: 0.03 }, { threshold: 0.25, lock: 0.10 },
+      { threshold: 0.50, lock: 0.25 }, { threshold: 1.00, lock: 0.50 },
+      { threshold: 2.00, lock: 0.75 },
+    ], profit_lock_dynamic_pct: 0.30,
+  }), ts);
+}
+
+export function ensureColumn(table, column, ddl) {
 }
 
 export function ensureColumn(table, column, ddl) {

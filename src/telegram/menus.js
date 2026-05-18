@@ -194,11 +194,11 @@ export function positionsText() {
   lines.push('📍 <b>OPEN POSITIONS</b>');
 
   if (dryOpen.length) {
-    lines.push('[DRY RUN]');
+    lines.push('🥃 [DRY RUN] ' + dryOpen.length + ' position(s)');
     lines.push(...dryOpen.map(formatPosition));
   }
   if (liveOpen.length) {
-    lines.push('[LIVE]');
+    lines.push('🔥 [LIVE] ' + liveOpen.length + ' position(s)');
     lines.push(...liveOpen.map(formatPosition));
   }
   if (!dryOpen.length && !liveOpen.length) {
@@ -209,11 +209,11 @@ export function positionsText() {
   if (hasClosed) {
     lines.push('\n📕 <b>RECENTLY CLOSED</b>');
     if (dryClosed.length) {
-      lines.push('[DRY RUN]');
+      lines.push('🥃 [DRY RUN]');
       lines.push(...dryClosed.map(formatPosition));
     }
     if (liveClosed.length) {
-      lines.push('[LIVE]');
+      lines.push('🔥 [LIVE]');
       lines.push(...liveClosed.map(formatPosition));
     }
   }
@@ -242,15 +242,23 @@ export function strategyMenuText() {
     strat.max_hold_ms > 0 ? `Max hold: ${Math.round(strat.max_hold_ms / 60000)}m` : null,
     strat.use_llm ? `LLM: yes (min ${strat.llm_min_confidence}%)` : 'LLM: no (rule-based)',
     '',
-    ...all.map(s => `${s.enabled ? '▶' : '○'} ${s.name}`),
+    ...all.map(s => {
+      const icon = s.enabled ? '▶ ' : '○ ';
+      const name = s.name.startsWith('💰') || s.name.startsWith('🎰') || s.name.startsWith('🦈') || s.name.startsWith('💎') || s.name.startsWith('🎲') ? s.name : s.name;
+      return `${icon}${name}`;
+    }),
   ].filter(Boolean).join('\n');
 }
 
 export function strategyKeyboard() {
   const strat = activeStrategy();
   const all = allStrategies();
+  const stratEmoji = {
+    sniper: '🎯', dip_buy: '📉', smart_money: '🦈', degen: '🎰',
+    stable_money: '💰', holder: '💎', ultimate_degen: '🎲',
+  };
   const selector = all.map(s => [{
-    text: `${s.enabled ? '▶ ' : ''}${s.name}`,
+    text: `${s.enabled ? '▶ ' : ''}${stratEmoji[s.id] || ''} ${s.name}`,
     callback_data: `strategy:select:${s.id}`,
   }]);
   const config = [
