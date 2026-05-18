@@ -91,7 +91,7 @@ async function fetchTwitterNarrative(graduatedCoin, gmgn) {
     const metrics = extractTweetMetricsFromFx(api.data);
     return { url, fxUrl: toFxTwitter(url), apiUrl, text, metrics, virality: viralityScore(metrics) };
   } catch (apiErr) {
-    console.log(`[twitter] api ${url} ${apiErr.response?.status || ''} ${apiErr.message}`);
+    console.log(`[twitter] fxtwitter api unavailable for ${url} (${apiErr.response?.status || apiErr.message}) — tweet may be delisted or private`);
   }
 
   try {
@@ -104,7 +104,7 @@ async function fetchTwitterNarrative(graduatedCoin, gmgn) {
     const metrics = extractTweetMetricsFromFx(res.data);
     return { url, fxUrl, text, metrics, virality: viralityScore(metrics) };
   } catch (err) {
-    console.log(`[twitter] ${url} ${err.message}`);
+    console.log(`[twitter] fxtwitter page fetch failed for ${url} (${err.message})`);
     return { url, fxUrl: toFxTwitter(url), text: null, error: err.message };
   }
 }
