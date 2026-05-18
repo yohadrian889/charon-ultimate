@@ -92,6 +92,30 @@ export async function handleCallback(query) {
     updateCandidateStatus(Number(id), 'ignored');
     return bot.sendMessage(chatId, 'Ignored candidate.');
   }
+  // Global positions actions
+  if (data === 'positions:sell_all') {
+    const { openPositions } = await import('../db/positions.js');
+    const positions = openPositions();
+    if (!positions.length) return bot.sendMessage(chatId, 'No open positions to sell.');
+    const livePositions = positions.filter(p => p.execution_mode === 'live');
+    if (!livePositions.length) return bot.sendMessage(chatId, 'No live positions to sell.');
+    const sold = [];
+    for (const pos of livePositions) {
+      try {
+        const { closePosition } = await import('./commands.js');
+        await closePosition(chatId, pos.id, 'MANUAL_SELL_ALL');
+        sold.push(pos.mint);
+      } catch(e) {
+        console.log(`[sell_all] ${pos.id} failed: ${e.message}`);
+      }
+    }
+    return bot.sendMessage(chatId, `✅ Sell all initiated for ${sold.length} live position(s).`);
+  }
+
+  if (data === 'positions:refresh_all') {
+    return editMenuMessage(query, positionsText(), positionsKeyboard());
+  }
+
   if (kind === 'buy') {
     const row = candidateById(Number(id));
     if (!row) return bot.sendMessage(chatId, 'Candidate not found.');

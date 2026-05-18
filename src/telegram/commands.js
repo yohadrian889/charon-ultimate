@@ -206,8 +206,17 @@ export async function sendPosition(chatId, id, query = null) {
     if (refreshed) row = { ...row, ...refreshed };
   }
   const buttons = row.status === 'open' ? positionButtons(id) : {};
-  if (query) return editMenuMessage(query, formatPosition(row), buttons);
-  await bot.sendMessage(chatId, formatPosition(row), { parse_mode: 'HTML', disable_web_page_preview: true, ...buttons });
+  const withBack = {
+    ...buttons,
+    reply_markup: {
+      inline_keyboard: [
+        ...(buttons.reply_markup?.inline_keyboard || []),
+        [{ text: '← Back to Positions', callback_data: 'menu:positions' }],
+      ],
+    },
+  };
+  if (query) return editMenuMessage(query, formatPosition(row), withBack);
+  await bot.sendMessage(chatId, formatPosition(row), { parse_mode: 'HTML', disable_web_page_preview: true, ...withBack });
 }
 
 export async function closePosition(chatId, id, reason) {

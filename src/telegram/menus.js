@@ -228,21 +228,16 @@ export function positionsText() {
 }
 
 export function positionsKeyboard() {
-  const dryOpen = openPositionsByMode('dry_run');
-  const liveOpen = openPositionsByMode('live');
-  const rows = [...dryOpen, ...liveOpen];
-  const buttons = rows.map(pos => {
-    const mode = pos.execution_mode === 'live' ? '🔥' : '🥃';
-    return [
-      { text: mode + ' Sell', callback_data: 'sell:' + pos.id },
-      { text: '↻', callback_data: 'pos:' + pos.id },
-      { text: 'TP25', callback_data: 'tp:' + pos.id + ':25' },
-      { text: 'TP50', callback_data: 'tp:' + pos.id + ':50' },
-      { text: 'SL15', callback_data: 'sl:' + pos.id + ':-15' },
-      { text: 'SL25', callback_data: 'sl:' + pos.id + ':-25' },
-    ];
-  });
-  return { reply_markup: { inline_keyboard: buttons } };
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: '📤 Sell All', callback_data: 'positions:sell_all' },
+          { text: '↻ Refresh All', callback_data: 'positions:refresh_all' },
+        ],
+      ],
+    },
+  };
 }
 
 export function strategyMenuText() {
