@@ -187,7 +187,12 @@ export async function sendCandidate(chatId, id) {
 
 export async function sendPositions(chatId) {
   // Use positionsText which separates dry/live/open/closed properly
-  await bot.sendMessage(chatId, positionsText(), { parse_mode: 'HTML', disable_web_page_preview: true });
+  // Also send inline buttons for quick actions (sell, refresh, tp, sl)
+  await bot.sendMessage(chatId, positionsText(), {
+    parse_mode: 'HTML',
+    disable_web_page_preview: true,
+    ...positionsKeyboard(),
+  });
 }
 
 export async function sendPosition(chatId, id, query = null) {

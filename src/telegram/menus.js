@@ -195,11 +195,17 @@ export function positionsText() {
 
   if (dryOpen.length) {
     lines.push('🥃 [DRY RUN] ' + dryOpen.length + ' position(s)');
-    lines.push(...dryOpen.map(formatPosition));
+    for (const pos of dryOpen) {
+      lines.push(formatPosition(pos));
+      lines.push('  [🥃 Sell] [↻ Rfsh] [📈 TP25] [📈 TP50] [📉 SL15] [📉 SL25]');
+    }
   }
   if (liveOpen.length) {
     lines.push('🔥 [LIVE] ' + liveOpen.length + ' position(s)');
-    lines.push(...liveOpen.map(formatPosition));
+    for (const pos of liveOpen) {
+      lines.push(formatPosition(pos));
+      lines.push('  [🔥 Sell] [↻ Rfsh] [📈 TP25] [📈 TP50] [📉 SL15] [📉 SL25]');
+    }
   }
   if (!dryOpen.length && !liveOpen.length) {
     lines.push('No open positions.');
@@ -219,6 +225,24 @@ export function positionsText() {
   }
 
   return lines.join('\n');
+}
+
+export function positionsKeyboard() {
+  const dryOpen = openPositionsByMode('dry_run');
+  const liveOpen = openPositionsByMode('live');
+  const rows = [...dryOpen, ...liveOpen];
+  const buttons = rows.map(pos => {
+    const mode = pos.execution_mode === 'live' ? '🔥' : '🥃';
+    return [
+      { text: mode + ' Sell', callback_data: 'sell:' + pos.id },
+      { text: '↻', callback_data: 'pos:' + pos.id },
+      { text: 'TP25', callback_data: 'tp:' + pos.id + ':25' },
+      { text: 'TP50', callback_data: 'tp:' + pos.id + ':50' },
+      { text: 'SL15', callback_data: 'sl:' + pos.id + ':-15' },
+      { text: 'SL25', callback_data: 'sl:' + pos.id + ':-25' },
+    ];
+  });
+  return { reply_markup: { inline_keyboard: buttons } };
 }
 
 export function strategyMenuText() {
