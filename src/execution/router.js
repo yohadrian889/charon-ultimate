@@ -26,6 +26,7 @@ export async function executeLiveBuy(selectedRow, decision, batchId, rows = [], 
     inputMint: WSOL_MINT,
     outputMint: selectedRow.candidate.token.mint,
     amount: amountLamports,
+    slippageBps: strat.slippage_bps ?? 300,
   });
   if (!swap.outputAmount) {
     swap.outputAmount = await fetchLiveTokenBalance(selectedRow.candidate.token.mint) || swap.outputAmount;
@@ -48,10 +49,12 @@ export async function executeLiveBuy(selectedRow, decision, batchId, rows = [], 
 export async function executeLiveSell(position, reason) {
   const amount = position.token_amount_raw || position.token_amount_est;
   if (!amount || Number(amount) <= 0) throw new Error('Live position has no token amount to sell.');
+  const strat = activeStrategy();
   return executeJupiterSwap({
     inputMint: position.mint,
     outputMint: WSOL_MINT,
     amount,
+    slippageBps: strat.slippage_bps ?? 300,
   });
 }
 
@@ -88,6 +91,7 @@ export async function executeConfirmedIntent(chatId, intentId) {
       inputMint: WSOL_MINT,
       outputMint: freshRow.candidate.token.mint,
       amount: amountLamports,
+      slippageBps: strat.slippage_bps ?? 300,
     });
     if (!swap.outputAmount) {
       swap.outputAmount = await fetchLiveTokenBalance(freshRow.candidate.token.mint) || swap.outputAmount;

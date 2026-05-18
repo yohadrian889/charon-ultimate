@@ -62,13 +62,14 @@ export async function liveWalletBalanceLamports() {
   return solanaConnection.getBalance(liveWallet.publicKey, 'confirmed');
 }
 
-async function jupiterOrder({ inputMint, outputMint, amount }) {
+async function jupiterOrder({ inputMint, outputMint, amount, slippageBps = JUPITER_SLIPPAGE_BPS }) {
   requireLiveExecution();
   const url = new URL(`${JUPITER_SWAP_BASE_URL.replace(/\/$/, '')}/order`);
   url.searchParams.set('inputMint', inputMint);
   url.searchParams.set('outputMint', outputMint);
   url.searchParams.set('amount', String(amount));
   url.searchParams.set('taker', liveWallet.publicKey.toBase58());
+  url.searchParams.set('slippageBps', String(slippageBps));
   const res = await axios.get(url.toString(), {
     timeout: 20_000,
     headers: { ...JSON_HEADERS, 'x-api-key': JUPITER_API_KEY },
@@ -103,8 +104,8 @@ async function jupiterExecute(order, signedTransaction) {
   return res.data;
 }
 
-export async function executeJupiterSwap({ inputMint, outputMint, amount }) {
-  const order = await jupiterOrder({ inputMint, outputMint, amount });
+export async function executeJupiterSwap({ inputMint, outputMint, amount, slippageBps }) {
+  const order = await jupiterOrder({ inputMint, outputMint, amount, slippageBps });
   const transaction = orderTransactionBase64(order);
   if (!transaction) throw new Error('Jupiter order did not include a transaction.');
   const signedTransaction = signTransactionBase64(transaction);

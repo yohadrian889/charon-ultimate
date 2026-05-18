@@ -34,6 +34,8 @@ export const PRESETS = {
     token_age_min_ms: 30 * 60 * 1000,
     token_age_max_ms: 3 * 60 * 60 * 1000,
     
+    slippage_bps: 200,
+    
     tp_percent: 999,
     use_profit_lock: true,
     
@@ -83,6 +85,8 @@ export const PRESETS = {
     token_age_min_ms: 5 * 60 * 1000,
     token_age_max_ms: 60 * 60 * 1000,
     
+    slippage_bps: 500,
+    
     tp_percent: 999,
     use_profit_lock: false,
     
@@ -126,6 +130,8 @@ export const PRESETS = {
     min_fee_claim_sol: 0.5,
     token_age_min_ms: 60 * 60 * 1000,
     token_age_max_ms: 4 * 60 * 60 * 1000,
+    
+    slippage_bps: 250,
     
     tp_percent: 999,
     use_profit_lock: true,
@@ -178,6 +184,8 @@ export const PRESETS = {
     token_age_min_ms: 2 * 60 * 60 * 1000,
     token_age_max_ms: 0,
     
+    slippage_bps: 300,
+    
     tp_percent: 999,
     use_profit_lock: true,
     
@@ -226,6 +234,8 @@ export const PRESETS = {
     min_fee_claim_sol: 0.15,
     token_age_min_ms: 10 * 60 * 1000,
     token_age_max_ms: 90 * 60 * 1000,
+    
+    slippage_bps: 300,
     
     tp_percent: 999,
     use_profit_lock: true,
