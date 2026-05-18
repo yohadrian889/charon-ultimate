@@ -12,6 +12,7 @@ import {
   mainMenuText,
   walletsText,
   positionsText,
+  positionsKeyboard,
   candidateButtons,
   sendTpSlDefaults,
   strategyMenuText,
