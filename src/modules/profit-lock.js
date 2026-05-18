@@ -13,7 +13,7 @@
 
 import { now } from '../utils.js';
 import { db } from '../db/connection.js';
-import { numSetting } from './db/settings.js';
+import { numSetting } from '../db/settings.js';
 
 // Profit lock tiers — each threshold triggers a higher floor
 const PROFIT_TIERS = [
