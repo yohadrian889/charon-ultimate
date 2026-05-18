@@ -7,7 +7,7 @@ Based on [Charon](https://github.com/yunus-0x/charon) by yunus-0x, with added fe
 - 💰 **Profit Lock System** — Dynamic exit strategy that locks profits as price rises
 - 🐦 **Twitter/X Sentiment** — Real-time social sentiment analysis
 - 🦈 **Smart Wallet Tracking** — Follow profitable traders' wallets
-- 💎 **Trading Presets** — Pre-configured strategies (Stable Money, Degen, Smart Money, Holder)
+- 🎲 **Trading Presets** — Pre-configured strategies (Stable Money, Degen, Smart Money, Holder, Ultimate Degen)
 
 ---
 
@@ -41,21 +41,24 @@ Dynamic exit strategy that locks profits progressively:
 
 | Price Action | Lock Level |
 |-------------|------------|
-| +15% | +5% |
-| +40% | +20% |
-| +80% | +50% |
+| +10% | +3% |
+| +25% | +10% |
+| +50% | +25% |
+| +100% | +50% |
+| +200% | +75% |
 | +80%+ | High - 30% (dynamic) |
 
 No fixed TP — lets winners run while protecting against reversals.
 
 ### Trading Presets
 
-| Preset | Description | Risk |
-|--------|-------------|------|
-| 💰 Stable Money | Conservative, lock profits early | Low |
-| 🎰 Degen | High risk, let winners run | High |
-| 🦈 Smart Money | Follow expert traders | Medium |
-| 💎 Diamond Hands | Long-term hold | Medium |
+| Preset | Description | Risk | Position | Slippage |
+|--------|-------------|------|----------|----------|
+| 💰 Stable Money | Conservative, lock profits early | Low | 0.05 SOL | 2% |
+| 🎰 Degen | High risk, no lock, let winners run | High | 0.2 SOL | 5% |
+| 🎲 **Ultimate Degen** | High RR + aggressive profit lock | High | 0.25 SOL | 3% |
+| 🦈 Smart Money | Follow expert traders | Medium | 0.1 SOL | 2.5% |
+| 💎 Diamond Hands | Long-term hold | Medium | 0.15 SOL | 3% |
 
 ---
 
@@ -83,16 +86,20 @@ chmod +x deploy.sh
 ## Telegram Commands
 
 - `/menu` — Open strategy menu
-- `/preset [name]` — Switch preset (stable_money, degen, smart_money, holder)
-- `/positions` — View open positions
+- `/preset [name]` — Switch preset (stable_money, degen, ultimate_degen, smart_money, holder)
+- `/positions` — View open positions (separated by dry_run / live)
 - `/pnl` — Show profit/loss
 - `/alerts` — Recent buy alerts from tracked wallets
+- `/stratset [id] [key] [value]` — Set preset config directly
 
 ---
 
 ## Version History
 
-- **v2.0.0** — Added profit lock, sentiment, wallet tracking, presets
+- **v1.3** — Add per-preset slippage settings (200-500 bps per preset)
+- **v1.2** — Separate dry run and live positions in UI, realistic backtest simulator
+- **v1.1** — Add ultimate_degen preset, profit lock system, dry/live position separation
+- **v1.0** — Initial fork: Charon base with sentiment, wallet tracking, presets
 
 ---
 

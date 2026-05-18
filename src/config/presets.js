@@ -5,11 +5,11 @@
  * Each preset has different risk/reward profiles.
  * 
  * Presets:
- * - stable_money: Conservative, prioritizes not losing over big gains
- * - degen: Aggressive, high risk high reward
- * - ultimate_degen: High RR, aggressive profit lock
- * - smart_money: Balanced, follows smart money patterns
- * - holder: Long-term, ignores short-term volatility
+ * - stable_money: Conservative, prioritizes not losing over big gains (v1.0+)
+ * - degen: Aggressive, high risk high reward (v1.0+)
+ * - ultimate_degen: High RR, aggressive profit lock (v1.1+)
+ * - smart_money: Balanced, follows smart money patterns (v1.0+)
+ * - holder: Long-term, ignores short-term volatility (v1.0+)
  */
 
 export const PRESETS = {
