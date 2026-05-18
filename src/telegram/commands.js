@@ -16,6 +16,7 @@ import {
   mainMenuText,
   walletsText,
   positionsText,
+  positionsKeyboard,
   candidateButtons,
   positionButtons,
   strategyMenuText,

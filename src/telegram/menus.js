@@ -228,16 +228,17 @@ export function positionsText() {
 }
 
 export function positionsKeyboard() {
-  return {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: '📤 Sell All', callback_data: 'positions:sell_all' },
-          { text: '↻ Refresh All', callback_data: 'positions:refresh_all' },
-        ],
-      ],
-    },
-  };
+  const dryOpen = openPositionsByMode('dry_run');
+  const liveOpen = openPositionsByMode('live');
+  const rows = [...dryOpen, ...liveOpen];
+  const buttons = rows.map(pos => {
+    const mode = pos.execution_mode === 'live' ? '🔥' : '🥃';
+    return [
+      { text: mode + ' Sell', callback_data: 'sell:' + pos.id },
+      { text: '↻', callback_data: 'pos:' + pos.id },
+    ];
+  });
+  return { reply_markup: { inline_keyboard: buttons } };
 }
 
 export function strategyMenuText() {
@@ -416,18 +417,9 @@ export function positionButtons(positionId) {
     reply_markup: {
       inline_keyboard: [
         [
-          { text: 'Dry Sell', callback_data: `sell:${positionId}` },
-          { text: 'Refresh', callback_data: `pos:${positionId}` },
+          { text: '📤 Sell', callback_data: `sell:${positionId}` },
+          { text: '↻ Refresh', callback_data: `pos:${positionId}` },
         ],
-        [
-          { text: 'TP +25%', callback_data: `tp:${positionId}:25` },
-          { text: 'TP +50%', callback_data: `tp:${positionId}:50` },
-        ],
-        [
-          { text: 'SL -15%', callback_data: `sl:${positionId}:-15` },
-          { text: 'SL -25%', callback_data: `sl:${positionId}:-25` },
-        ],
-        [{ text: 'Trail On/Off', callback_data: `trail:${positionId}` }],
       ],
     },
   };
