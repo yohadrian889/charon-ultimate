@@ -29,6 +29,9 @@ import { handleCallback, editMenuMessage } from './callbacks.js';
 import { consumeNumericFilterInput } from './input.js';
 import { runLearning, sendLessons } from '../learning/commands.js';
 import { fetchWalletPnl } from '../enrichment/wallets.js';
+import { fetchTwitterMentions } from '../modules/twitter-sentiment.js';
+import { trackWallet, getTrackedWallets, getWalletStats } from '../modules/wallet-tracker.js';
+import { getProfitLockStatus } from '../modules/profit-lock.js';
 
 export async function handleMessage(msg) {
   const text = (msg.text || '').trim();
@@ -76,6 +79,35 @@ export async function handleMessage(msg) {
     return bot.sendMessage(chatId, `Updated ${id}.${key} = ${value}\n\n${strategyMenuText()}`, { parse_mode: 'HTML' });
   }
   if (text.startsWith('/pnl')) return sendPnl(chatId);
+  if (text.startsWith('/sentiment')) {
+    const symbol = (text.split(/\s+/)[1] || '').toUpperCase();
+    if (!symbol) return bot.sendMessage(chatId, 'Usage: /sentiment <token_symbol>\nExample: /sentiment FARTCOIN');
+    const mentions = await fetchTwitterMentions(symbol).catch(() => null);
+    if (!mentions) return bot.sendMessage(chatId, 'Twitter API not configured or no data.');
+    return bot.sendMessage(chatId, mentions, { parse_mode: 'HTML' });
+  }
+  if (text.startsWith('/wallettrack')) {
+    const address = text.split(/\s+/)[1];
+    if (!address) {
+      const tracked = getTrackedWallets();
+      if (!tracked.length) return bot.sendMessage(chatId, 'No wallets tracked. Usage: /wallettrack <address>');
+      const lines = ['Tracked Wallets'];
+      for (const w of tracked) lines.push('- ' + (w.label || w.address.slice(0,8)));
+      return bot.sendMessage(chatId, lines.join('\n'));
+    }
+    const stats = await getWalletStats(address).catch(() => null);
+    if (!stats) return bot.sendMessage(chatId, 'Could not fetch wallet data');
+    const msg = 'Wallet: ' + address.slice(0,12) + '...\nPnL: ' + (stats.pnl_sol || 0) + ' SOL\nTrades: ' + (stats.total_trades || 0);
+    trackWallet(address);
+    return bot.sendMessage(chatId, msg);
+  }
+  if (text.startsWith('/profitlock')) {
+    const strat = activeStrategy();
+    const hasLock = strat.use_profit_lock && strat.profit_lock_tiers?.length;
+    if (!hasLock) return bot.sendMessage(chatId, 'Profit lock not enabled for this strategy');
+    const tiers = strat.profit_lock_tiers.map(t => (t.threshold*100).toFixed(0) + '% => lock ' + (t.lock*100).toFixed(0) + '%').join('\n');
+    return bot.sendMessage(chatId, 'Profit Lock Tiers:\n' + tiers, { parse_mode: 'HTML' });
+  }
   if (text.startsWith('/learn')) {
     const windowArg = text.split(/\s+/)[1] || '12h';
     return runLearning(chatId, windowArg);
@@ -238,6 +270,9 @@ export async function toggleTrailing(chatId, id, query = null) {
 
 export function setupTelegram() {
   bot.setMyCommands([
+    { command: 'sentiment', description: 'Check token Twitter sentiment' },
+    { command: 'wallettrack', description: 'Track a wallet for trades' },
+    { command: 'profitlock', description: 'Show profit lock tiers' },
     { command: 'menu', description: 'Open Charon menu' },
     { command: 'strategy', description: 'Show/switch strategy' },
     { command: 'stratset', description: 'Set strategy config (stratset id key value)' },
